@@ -39,7 +39,8 @@ jobs:
           # ass-kt (native libass + JNI)
           KDIR=repo/io/github/peerless2012/ass-kt/$VER
           mkdir -p $KDIR
-          cp lib_ass_kt/build/outputs/aar/lib_ass_kt-release.aar $KDIR/ass-kt-$VER.aar
+          KT_AAR=$(find lib_ass_kt/build -name "*.aar" | head -1)
+          cp $KT_AAR $KDIR/ass-kt-$VER.aar
           cat > $KDIR/ass-kt-$VER.pom <<POM
           <?xml version="1.0" encoding="UTF-8"?>
           <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -73,7 +74,8 @@ jobs:
           # ass-media (Media3 integration)
           MDIR=repo/io/github/peerless2012/ass-media/$VER
           mkdir -p $MDIR
-          cp lib_ass_media/build/outputs/aar/lib_ass_media-release.aar $MDIR/ass-media-$VER.aar
+          MEDIA_AAR=$(find lib_ass_media/build -name "*.aar" | head -1)
+          cp $MEDIA_AAR $MDIR/ass-media-$VER.aar
           cat > $MDIR/ass-media-$VER.pom <<POM
           <?xml version="1.0" encoding="UTF-8"?>
           <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
