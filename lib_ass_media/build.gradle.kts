@@ -42,7 +42,7 @@ dependencies {
     implementation(libs.androidx.media3.exo)
     implementation(libs.androidx.media3.ui)
     implementation(libs.androidx.media3.effect)
-    implementation(project(":lib_ass_kt"))
+    implementation("io.github.peerless2012:lib_ass_kt:0.5.0")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

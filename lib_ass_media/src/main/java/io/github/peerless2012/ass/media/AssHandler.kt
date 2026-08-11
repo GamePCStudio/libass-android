@@ -8,6 +8,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.MimeTypes
 import androidx.media3.common.MimeTypes.TEXT_SSA
 import androidx.media3.common.Player.Listener
+import androidx.media3.common.Player
 import androidx.media3.common.Tracks
 import androidx.media3.common.VideoSize
 import androidx.media3.common.util.Size
@@ -189,6 +190,25 @@ class AssHandler(
      * @param width The new width of the surface.
      * @param height The new height of the surface.
      */
+    /**
+     * WebHomeTV fork: force a subtitle re-render after seek.
+     *
+     * The [videoTime] setter skips callbacks when the value is unchanged; seeking back to
+     * (nearly) the same position can therefore leave subtitles stuck or missing. Re-invoking
+     * the callback here triggers AssSubtitleView.requestRender on the GL thread.
+     */
+    override fun onPositionDiscontinuity(
+        oldPosition: Player.PositionInfo,
+        newPosition: Player.PositionInfo,
+        reason: Int
+    ) {
+        super.onPositionDiscontinuity(oldPosition, newPosition, reason)
+        val current = videoTime
+        if (current >= 0) {
+            videoTimeCallback?.invoke(current)
+        }
+    }
+
     override fun onSurfaceSizeChanged(width: Int, height: Int) {
         super.onSurfaceSizeChanged(width, height)
         Log.i("AssHandler", "onSurfaceSizeChanged: width = $width, height = $height")

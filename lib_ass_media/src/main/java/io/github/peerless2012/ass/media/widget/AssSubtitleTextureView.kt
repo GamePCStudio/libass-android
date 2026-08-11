@@ -144,8 +144,10 @@ class AssSubtitleTextureView : TextureView, AssSubtitleRender, TextureView.Surfa
                     MSG_RELEASE -> releaseInternal()
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "GL thread error", e)
-                releaseInternal()
+                // WebHomeTV fork: keep the render thread alive on transient errors.
+                // Killing the thread on a single failed frame (e.g. during seek) makes
+                // subtitles disappear permanently until the surface is recreated.
+                Log.e(TAG, "GL thread frame error (kept alive)", e)
             }
             return true
         }
@@ -261,13 +263,15 @@ class AssSubtitleTextureView : TextureView, AssSubtitleRender, TextureView.Surfa
         private var useNativeTexture = false
 
         override fun onSurfaceCreated() {
-            // Detect GL_EXT_unpack_subimage support.
-            // Native createTexture relies on this extension for stride-aware texture upload.
-            // On GPUs that don't support it (e.g. Mali-470), fallback to bitmap mode.
+            // WebHomeTV fork: always use the bitmap upload path.
+            // The native texture path (GL_EXT_unpack_subimage, AssTexType.TEXTURE) fails to
+            // render on some newer GPUs (Android 14 boxes) while the bitmap path works on
+            // both old (N1/Mali-450) and new devices. Keep the extension detection code as
+            // reference only.
             val extensions = GLES20.glGetString(GLES20.GL_EXTENSIONS) ?: ""
-            useNativeTexture = "GL_EXT_unpack_subimage" in extensions
-            if (!useNativeTexture) {
-                Log.w(TAG, "GL_EXT_unpack_subimage not supported, fallback to bitmap texture upload")
+            useNativeTexture = false
+            if (extensions.contains("GL_EXT_unpack_subimage")) {
+                Log.w(TAG, "GL_EXT_unpack_subimage available but bitmap path forced for compatibility")
             }
 
             glProgram = GlProgram(vertexShaderCode, fragmentShaderCode)
