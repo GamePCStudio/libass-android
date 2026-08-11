@@ -26,6 +26,11 @@ jobs:
           distribution: temurin
           java-version: "17"
 
+      - name: Install autotools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y autoconf automake libtool gettext autopoint pkg-config
+
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 

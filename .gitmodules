@@ -1,4 +1,4 @@
 [submodule "lib_ass/src/main/cpp/libass-cmake"]
 	path = lib_ass/src/main/cpp/libass-cmake
-	url = https://github.com/peerless2012/libass-cmake.git
+	url = https://github.com/GamePCStudio/libass-cmake.git
 	ignore = dirty
