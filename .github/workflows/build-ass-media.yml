@@ -30,16 +30,12 @@ jobs:
       - name: Build aars (native + kt + media)
         run: |
           chmod +x ./gradlew
-          ./gradlew :lib_ass_media:assembleRelease --no-daemon
+          ./gradlew :lib_ass_kt:assembleRelease :lib_ass_media:assembleRelease --no-daemon
 
       - name: Assemble maven repo
         run: |
           set -e
           VER=0.5.0-fongmi-fix
-          echo "== AAR SEARCH =="
-          find . -name "*.aar" | head -20
-          echo "== END SEARCH =="
-          ls lib_ass_kt/build 2>/dev/null || echo "no kt build dir"
           # ass-kt (native libass + JNI)
           KDIR=repo/io/github/peerless2012/ass-kt/$VER
           mkdir -p $KDIR
