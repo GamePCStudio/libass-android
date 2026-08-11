@@ -30,7 +30,8 @@ jobs:
       - name: Build aars (native + kt + media)
         run: |
           chmod +x ./gradlew
-          ./gradlew :lib_ass_kt:assembleRelease :lib_ass_media:assembleRelease --no-daemon
+          ./gradlew :lib_ass_kt:assembleRelease --no-daemon
+          ./gradlew :lib_ass_media:assembleRelease --no-daemon
 
       - name: Assemble maven repo
         run: |
