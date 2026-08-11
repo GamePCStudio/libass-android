@@ -37,7 +37,7 @@ jobs:
           DIR=repo/io/github/peerless2012/ass-media/$VER
           mkdir -p $DIR
           cp lib_ass_media/build/outputs/aar/lib_ass_media-release.aar $DIR/ass-media-$VER.aar
-          cat > $DIR/ass-media-$VER.pom <<'POM'
+          cat > $DIR/ass-media-$VER.pom <<POM
           <?xml version="1.0" encoding="UTF-8"?>
           <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <modelVersion>4.0.0</modelVersion>
@@ -58,7 +58,7 @@ jobs:
             </dependencies>
           </project>
           POM
-          cat > $DIR/maven-metadata.xml <<'META'
+          cat > $DIR/maven-metadata.xml <<META
           <?xml version="1.0" encoding="UTF-8"?>
           <metadata>
             <groupId>io.github.peerless2012</groupId>
