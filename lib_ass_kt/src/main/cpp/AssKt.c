@@ -28,6 +28,14 @@ jlong nativeAssInit(JNIEnv* env, jclass clazz) {
     ASS_Library* assLibrary = ass_library_init();
     ass_set_message_cb(assLibrary, assMessageCallback, env);
     ass_set_extract_fonts(assLibrary, 1);
+    // WebHomeTV fork: point libass at the Android system font directory so glyphs
+    // (especially CJK) can be rendered. Without a font source, Chinese text renders
+    // blank and effect layout is broken. Must run before the renderer is created.
+    ass_set_fonts_dir(assLibrary, "/system/fonts");
+    // DIRECT provider + Noto CJK JP default: the first face of NotoSansCJK-Regular.ttc
+    // on Android is "Noto Sans CJK JP" (contains full CJK + Latin glyphs), so unknown
+    // ASS font names fall back to a font that can actually draw the text.
+    ass_set_fonts(assLibrary, NULL, "Noto Sans CJK JP", ASS_FONTPROVIDER_DIRECT, NULL, 1);
     return (jlong) assLibrary;
 }
 

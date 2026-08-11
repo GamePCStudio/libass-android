@@ -37,6 +37,33 @@ class Ass {
 
     private var nativeAss: Long = nativeAssInit()
 
+    init {
+        registerFallbackFonts()
+    }
+
+    /**
+     * WebHomeTV fork: register the system CJK font under common ASS font names.
+     * libass matches the ASS "Fontname" against registered font names first; without
+     * this, subtitles using Chinese font names (Microsoft YaHei / SimHei / ...) render
+     * blank because no font source is available on Android.
+     */
+    private fun registerFallbackFonts() {
+        try {
+            val cjk = java.io.File("/system/fonts/NotoSansCJK-Regular.ttc")
+            if (!cjk.exists()) return
+            val bytes = cjk.readBytes()
+            val names = arrayOf(
+                "Microsoft YaHei", "寰蒋闆呴粦", "SimHei", "榛戜綋", "SimSun", "瀹嬩綋",
+                "Noto Sans CJK SC", "Noto Sans CJK JP", "sans-serif", "Arial"
+            )
+            for (name in names) {
+                nativeAssAddFont(nativeAss, name, bytes)
+            }
+        } catch (e: Exception) {
+            android.util.Log.w("Ass", "registerFallbackFonts failed", e)
+        }
+    }
+
     @Volatile
     var released = false
         private set

@@ -9,9 +9,11 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - uses: actions/setup-java@v4
         with:
@@ -23,9 +25,9 @@ jobs:
 
       - name: Install SDK packages
         run: |
-          sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+          sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0" "ndk;28.1.13356709"
 
-      - name: Build aar
+      - name: Build aars (native + kt + media)
         run: |
           chmod +x ./gradlew
           ./gradlew :lib_ass_media:assembleRelease --no-daemon
@@ -34,10 +36,45 @@ jobs:
         run: |
           set -e
           VER=0.5.0-fongmi-fix
-          DIR=repo/io/github/peerless2012/ass-media/$VER
-          mkdir -p $DIR
-          cp lib_ass_media/build/outputs/aar/lib_ass_media-release.aar $DIR/ass-media-$VER.aar
-          cat > $DIR/ass-media-$VER.pom <<POM
+          # ass-kt (native libass + JNI)
+          KDIR=repo/io/github/peerless2012/ass-kt/$VER
+          mkdir -p $KDIR
+          cp lib_ass_kt/build/outputs/aar/lib_ass_kt-release.aar $KDIR/ass-kt-$VER.aar
+          cat > $KDIR/ass-kt-$VER.pom <<POM
+          <?xml version="1.0" encoding="UTF-8"?>
+          <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <modelVersion>4.0.0</modelVersion>
+            <groupId>io.github.peerless2012</groupId>
+            <artifactId>ass-kt</artifactId>
+            <version>$VER</version>
+            <packaging>aar</packaging>
+            <name>ass-kt</name>
+            <description>Kotlin bindings and JNI for libass.</description>
+            <dependencies>
+              <dependency><groupId>org.jetbrains.kotlin</groupId><artifactId>kotlin-stdlib</artifactId><version>2.2.0</version><scope>compile</scope></dependency>
+            </dependencies>
+          </project>
+          POM
+          cat > $KDIR/maven-metadata.xml <<META
+          <?xml version="1.0" encoding="UTF-8"?>
+          <metadata>
+            <groupId>io.github.peerless2012</groupId>
+            <artifactId>ass-kt</artifactId>
+            <versioning>
+              <latest>$VER</latest>
+              <release>$VER</release>
+              <versions>
+                <version>$VER</version>
+              </versions>
+              <lastUpdated>20260812000000</lastUpdated>
+            </versioning>
+          </metadata>
+          META
+          # ass-media (Media3 integration)
+          MDIR=repo/io/github/peerless2012/ass-media/$VER
+          mkdir -p $MDIR
+          cp lib_ass_media/build/outputs/aar/lib_ass_media-release.aar $MDIR/ass-media-$VER.aar
+          cat > $MDIR/ass-media-$VER.pom <<POM
           <?xml version="1.0" encoding="UTF-8"?>
           <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <modelVersion>4.0.0</modelVersion>
@@ -54,11 +91,42 @@ jobs:
               <dependency><groupId>androidx.media3</groupId><artifactId>media3-exoplayer</artifactId><version>1.8.0</version><scope>runtime</scope></dependency>
               <dependency><groupId>androidx.media3</groupId><artifactId>media3-ui</artifactId><version>1.8.0</version><scope>runtime</scope></dependency>
               <dependency><groupId>androidx.media3</groupId><artifactId>media3-effect</artifactId><version>1.8.0</version><scope>runtime</scope></dependency>
-              <dependency><groupId>io.github.peerless2012</groupId><artifactId>ass-kt</artifactId><version>0.5.0</version><scope>runtime</scope></dependency>
+              <dependency><groupId>io.github.peerless2012</groupId><artifactId>ass-kt</artifactId><version>$VER</version><scope>runtime</scope></dependency>
             </dependencies>
           </project>
           POM
-          cat > $DIR/maven-metadata.xml <<META
+          cat > $MDIR/maven-metadata.xml <<META
+          <?xml version="1.0" encoding="UTF-8"?>
+          <metadata>
+            <groupId>io.github.peerless2012</groupId>
+            <artifactId>ass-media</artifactId>
+            <versioning>
+              <latest>$VER</latest>
+              <release>$VER</release>
+              <versions>
+                <version>$VER</version>
+              </versions>
+              <lastUpdated>20260812000000</lastUpdated>
+            </versioning>
+          </metadata>
+          META
+          # parent metadata files
+          cat > repo/io/github/peerless2012/ass-kt/maven-metadata.xml <<META
+          <?xml version="1.0" encoding="UTF-8"?>
+          <metadata>
+            <groupId>io.github.peerless2012</groupId>
+            <artifactId>ass-kt</artifactId>
+            <versioning>
+              <latest>$VER</latest>
+              <release>$VER</release>
+              <versions>
+                <version>$VER</version>
+              </versions>
+              <lastUpdated>20260812000000</lastUpdated>
+            </versioning>
+          </metadata>
+          META
+          cat > repo/io/github/peerless2012/ass-media/maven-metadata.xml <<META
           <?xml version="1.0" encoding="UTF-8"?>
           <metadata>
             <groupId>io.github.peerless2012</groupId>
