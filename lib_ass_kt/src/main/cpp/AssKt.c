@@ -184,9 +184,15 @@ static JNINativeMethod trackMethodTable[] = {
 
 jlong nativeAssRenderInit(JNIEnv* env, jclass clazz, jlong ass) {
     ASS_Renderer *assRenderer = ass_renderer_init((ASS_Library *) ass);
-    // Default family falls back to the CJK font registered from /system/fonts
-    // (first face of NotoSansCJK-Regular.ttc is "Noto Sans CJK JP").
-    ass_set_fonts(assRenderer, NULL, "Noto Sans CJK JP", ASS_FONTPROVIDER_FONTCONFIG, NULL, 1);
+    // Three-layer font resolution for CJK rendering:
+    // 1) exact Fontname match against fonts registered from /system/fonts
+    //    (ass_set_fonts_dir, scanned when the font selector is created);
+    // 2) fallback to default family "Noto Sans CJK JP";
+    // 3) hard fallback to the system CJK font file itself (default_font path),
+    //    guaranteeing Chinese glyphs are available regardless of family matching.
+    // Provider NONE: no fontconfig needed, embedded fonts + explicit paths only.
+    ass_set_fonts(assRenderer, "/system/fonts/NotoSansCJK-Regular.ttc", "Noto Sans CJK JP",
+                  ASS_FONTPROVIDER_NONE, NULL, 1);
     return (jlong) assRenderer;
 }
 
