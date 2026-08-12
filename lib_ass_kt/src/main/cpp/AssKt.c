@@ -35,7 +35,10 @@ jlong nativeAssInit(JNIEnv* env, jclass clazz) {
     // DIRECT provider + Noto CJK JP default: the first face of NotoSansCJK-Regular.ttc
     // on Android is "Noto Sans CJK JP" (contains full CJK + Latin glyphs), so unknown
     // ASS font names fall back to a font that can actually draw the text.
-    ass_set_fonts(assLibrary, NULL, "Noto Sans CJK JP", ASS_FONTPROVIDER_DIRECT, NULL, 1);
+    // Bundled ass.h is libass 0.14-era (ASS_DefaultFontProvider, ASS_Renderer* first arg).
+    // The linked libass (libass-cmake master) interprets provider value 2 as
+    // ASS_FONTPROVIDER_DIRECT and takes ASS_Library* as first argument.
+    ass_set_fonts((ASS_Renderer *) assLibrary, NULL, "Noto Sans CJK JP", 2, NULL, 1);
     return (jlong) assLibrary;
 }
 
@@ -186,7 +189,8 @@ static JNINativeMethod trackMethodTable[] = {
 
 jlong nativeAssRenderInit(JNIEnv* env, jclass clazz, jlong ass) {
     ASS_Renderer *assRenderer = ass_renderer_init((ASS_Library *) ass);
-    ass_set_fonts(assRenderer, NULL, "sans-serif", ASS_FONTPROVIDER_FONTCONFIG, NULL, 1);
+    // DIRECT provider (value 2 in the linked libass) + CJK default family for Chinese glyphs.
+    ass_set_fonts(assRenderer, NULL, "Noto Sans CJK JP", 2, NULL, 1);
     return (jlong) assRenderer;
 }
 
